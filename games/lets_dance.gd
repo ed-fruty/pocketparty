@@ -252,14 +252,10 @@ func _draw() -> void:
 			border.border_color = color
 			draw_style_box(border, rect.grow(2))
 		text_at("%d · %s" % [i + 1, SYMBOLS[sequence[i]] if shown else "?"], rect.get_center() + Vector2(0, 6), 21, color if shown else Color("a4afc8"))
-	var columns: int = roster.size() if size.x > size.y else mini(2, roster.size())
-	var rows: int = ceili(float(roster.size()) / columns)
-	var area = Rect2(16, 302, size.x - 32, maxf(100, size.y - 482))
-	var cell: Vector2 = Vector2((area.size.x - (columns - 1) * 12) / columns, (area.size.y - (rows - 1) * 12) / rows)
-	for i in range(roster.size()):
-		var p: Dictionary = roster[i]
-		var rect = Rect2(area.position + Vector2(i % columns, floori(float(i) / columns)) * (cell + Vector2(12, 12)), cell)
-		draw_style_box(style(Color("20233e"), 18), rect)
+	for p in roster:
+		var rect: Rect2 = player_field(p.id, 302, 180)
+		var cell: Vector2 = rect.size
+		draw_player_field(rect, p.id, Color("20233e"))
 		var active: bool = p.id == leader_id if phase in ["create", "watch"] else can_move(p.id)
 		if active:
 			var outline = style(Color.TRANSPARENT, 18)

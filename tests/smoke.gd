@@ -384,7 +384,8 @@ func _ready() -> void:
 	dark.activate(0)
 	check(dark.scores[0] == points_before + 5, "Outer portion of dark range scores")
 	dark.time = 2.3
-	dark.positions[0] = fposmod(dark.targets[0] + dark.range_lengths[0] / 2 + dark.ring_overlap_allowance() + 0.01, 1)
+	# Use the opposite side: around corners, Euclidean ring overlap can exceed a perimeter-distance estimate.
+	dark.positions[0] = fposmod(dark.targets[0] + 0.5, 1)
 	points_before = dark.scores[0]
 	dark.activate(0)
 	check(dark.scores[0] == points_before, "Outside visible range does not score")

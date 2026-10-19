@@ -1,1 +1,1 @@
-NetPlay is here! Create or join a room on the same Wi-Fi and play all eight mini-games on separate devices. Add bots, build tournaments, and earn gold on your own device. Includes clear player controls and connection handling.
+Player fields now match their finger controls: P1/P2 at the bottom and P3/P4 at the top, with clear player-colored borders. Includes NetPlay over local Wi-Fi, all eight mini-games and tournaments.

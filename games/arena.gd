@@ -245,19 +245,20 @@ func _draw() -> void:
 	draw_style_box(style(Color("151e34")), Rect2(0, 110, size.x, arena_height))
 	if game_id == "sprint":
 		round_clock("%02d seconds" % maxi(0, ceili(duration - time)))
-		var lane_h: float = minf(120, (arena_height - 65) / maxf(1, roster.size()))
 		var target: float = 80.0
-		for i in range(roster.size()):
-			var p = roster[i]
-			var y: float = size.y / 2 - (roster.size() - 1) * lane_h / 2 + i * lane_h
-			draw_line(Vector2(35, y), Vector2(size.x - 35, y), Color("29344b"), 3)
+		for p in roster:
+			var lane: Rect2 = player_field(p.id)
+			draw_player_field(lane, p.id)
+			var y: float = lane.get_center().y
+			text_at("P%d%s" % [p.id + 1, " · BOT" if p.bot else ""], Vector2(lane.get_center().x, lane.position.y + 28), 18, p.color)
+			draw_line(Vector2(lane.position.x + 22, y), Vector2(lane.end.x - 22, y), Color("29344b"), 3)
 			for x in range(5):
-				draw_line(Vector2(size.x - 43 + (x % 2) * 7, y - 18 + x * 7), Vector2(size.x - 36 + (x % 2) * 7, y - 18 + x * 7), Color("f4f1ff"), 5)
-			var pos = Vector2(42 + (size.x - 115) * minf(float(shown_steps[p.id]) / target, 1), y)
+				draw_line(Vector2(lane.end.x - 43 + (x % 2) * 7, y - 18 + x * 7), Vector2(lane.end.x - 36 + (x % 2) * 7, y - 18 + x * 7), Color("f4f1ff"), 5)
+			var pos = Vector2(lane.position.x + 42 + (lane.size.x - 115) * minf(float(shown_steps[p.id]) / target, 1), y)
 			runners[p.id].size = Vector2(64, 64)
 			runners[p.id].position = pos - Vector2(32, 32)
 			runners[p.id].visible = countdown <= 0
-			text_at(str(scores[p.id]), Vector2(pos.x, y + 32), 16, p.color)
+			text_at(str(scores[p.id]), Vector2(pos.x, y + 40), 16, p.color)
 	else:
 		var green: bool = signal_phase == "go"
 		var c = Vector2(size.x / 2, size.y / 2)
@@ -355,3 +356,32 @@ func round_clock(value: String) -> void:
 		text_at(note, Vector2(size.x / 2, size.y - 12), 16, Party.COLORS[maxi(0, NetPlay.local_id)])
 	draw_style_box(style(Color("17243c"), 16), Rect2(size.x / 2 - 105, 8, 210, 40))
 	text_at(value, Vector2(size.x / 2, 36), 24, Color("ffd15c"))
+
+func player_field(id: int, top: float = 110, bottom: float = 110) -> Rect2:
+	# Use the same bottom-first seating as the fingers: P3 P4 / P1 P2.
+	var area = Rect2(8, top, maxf(1, size.x - 16), maxf(1, size.y - top - bottom))
+	if roster.size() == 1:
+		return area
+	var column: int = id % 2
+	var row: int = 1 if id < 2 else 0
+	var columns: int = 2
+	var rows: int = 2
+	if roster.size() == 2:
+		if size.y > size.x:
+			rows = 1
+			row = 0
+			column = 0 if roster[0].id == id else 1
+		elif roster[0].id % 2 != roster[1].id % 2:
+			rows = 1
+			row = 0
+		else:
+			columns = 1
+			column = 0
+	var cell = Vector2((area.size.x - (columns - 1) * 12) / columns, (area.size.y - (rows - 1) * 12) / rows)
+	return Rect2(area.position + Vector2(column, row) * (cell + Vector2(12, 12)), cell)
+
+func draw_player_field(rect: Rect2, id: int, fill: Color = Color("17243c")) -> void:
+	var panel = style(fill, 18)
+	panel.set_border_width_all(4)
+	panel.border_color = Party.COLORS[id]
+	draw_style_box(panel, rect)

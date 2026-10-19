@@ -2,7 +2,7 @@
 
 App: **4 Players Game Offline**  
 Package: **com.frutylabs.pocketparty**  
-Latest upload: **0.3.0, version code 4**
+Latest upload: **0.3.1, version code 5**
 Support: **ed.fruty@gmail.com**  
 Privacy policy: https://raw.githubusercontent.com/ed-fruty/pocketparty/main/PRIVACY_POLICY.md  
 Source: https://github.com/ed-fruty/pocketparty
@@ -10,7 +10,7 @@ Source: https://github.com/ed-fruty/pocketparty
 ## Upload order
 
 1. Create or open the Play Console app for this package. Use the English listing text in `listing/en-US/`.
-2. Upload `bundle/com.frutylabs.pocketparty-v4.aab` to the test or release track you intend to use. Version code 4 adds optional NetPlay over local Wi-Fi. Earlier AABs were delivered separately; do not attempt to replace an already-uploaded build with the same version code.
+2. Upload `bundle/com.frutylabs.pocketparty-v5.aab` to the test or release track you intend to use. Version code 5 aligns player fields with their finger controls and adds player-colored field borders. It includes NetPlay over local Wi-Fi. Earlier AABs were delivered separately; do not attempt to replace an already-uploaded build with the same version code.
 3. Upload `graphics/app-icon-512.png` as the app icon and `graphics/feature-graphic-1024x500.png` as the feature graphic.
 4. Upload screenshots from the corresponding phone, 7-inch tablet, and 10-inch tablet folders. The first three phone gameplay screenshots can be ordered Snake Clash, Pair Peek, and Let's Dance; the library screenshot may follow them.
 5. Set the support email and privacy URL above. `store-settings.json` records the recommended listing values.

@@ -94,15 +94,9 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func board_square(id: int) -> Rect2:
-	var cols: int = mini(2, roster.size()) if size.y > size.x else roster.size()
-	var rows: int = ceili(float(roster.size()) / cols)
-	var cell = Vector2((size.x - (cols - 1) * 12) / cols, (size.y - 220 - (rows - 1) * 12) / rows)
-	var side: float = maxf(30, minf(cell.x - 65, cell.y - 85))
-	var index: int = 0
-	for i in range(roster.size()):
-		if roster[i].id == id:
-			index = i
-	var center = Vector2((index % cols) * (cell.x + 12), 110 + floorf(float(index) / cols) * (cell.y + 12)) + cell / 2 - Vector2(0, 6)
+	var rect: Rect2 = player_field(id)
+	var side: float = maxf(30, minf(rect.size.x - 65, rect.size.y - 85))
+	var center: Vector2 = rect.get_center() - Vector2(0, 6)
 	return Rect2(center - Vector2.ONE * side / 2, Vector2.ONE * side)
 
 static func visible_overlap(square: Rect2, position: float, target: float, length: float) -> bool:
@@ -168,16 +162,13 @@ func activate(id: int) -> void:
 func _draw() -> void:
 	var remaining: int = maxi(0, ceili(duration - time))
 	round_clock("%02d:%02d" % [remaining / 60, remaining % 60])
-	var portrait: bool = size.y > size.x
-	var cols: int = mini(2, roster.size()) if portrait else roster.size()
-	var rows: int = ceili(float(roster.size()) / cols)
-	var cell = Vector2((size.x - (cols - 1) * 12) / cols, (size.y - 220 - (rows - 1) * 12) / rows)
 	pads.clear()
-	for i in range(roster.size()):
-		var p = roster[i]
-		var rect = Rect2(Vector2((i % cols) * (cell.x + 12), 110 + floorf(float(i) / cols) * (cell.y + 12)), cell)
+	for p in roster:
+		var rect: Rect2 = player_field(p.id)
+		var cell: Vector2 = rect.size
 		pads[p.id] = rect
-		draw_style_box(style(Color("17243c"), 22), rect)
+		draw_player_field(rect, p.id)
+		text_at("P%d%s" % [p.id + 1, " · BOT" if p.bot else ""], Vector2(rect.get_center().x, rect.position.y + 24), 16, p.color)
 		var side: float = maxf(30, minf(cell.x - 65, cell.y - 85))
 		var center: Vector2 = rect.get_center() - Vector2(0, 6)
 		var square = board_square(p.id)

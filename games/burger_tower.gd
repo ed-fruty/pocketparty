@@ -69,18 +69,13 @@ func activate(id: int) -> void:
 		audio.tone(340 + id * 90)
 
 func _draw() -> void:
-	var portrait: bool = size.y > size.x
-	var cols: int = mini(2, roster.size()) if portrait else roster.size()
-	var rows: int = ceili(float(roster.size()) / cols)
-	var top: float = 110
 	round_clock("Settling…" if time >= duration else "%02d seconds" % maxi(0, ceili(duration - time)))
-	var cell: Vector2 = Vector2((size.x - (cols - 1) * 12) / cols, (size.y - top - 110 - (rows - 1) * 12) / rows)
 	pads.clear()
-	for i in range(roster.size()):
-		var p = roster[i]
-		var rect = Rect2(Vector2((i % cols) * (cell.x + 12), top + floorf(float(i) / cols) * (cell.y + 12)), cell)
+	for p in roster:
+		var rect: Rect2 = player_field(p.id)
+		var cell: Vector2 = rect.size
 		lane_rects[p.id] = rect
-		draw_style_box(style(p.color.darkened(0.9), 20), rect)
+		draw_player_field(rect, p.id, p.color.darkened(0.9))
 		text_at("P%d%s · %d cm" % [p.id + 1, " BOT" if p.bot else "", roundi(display_scores[p.id])], rect.position + Vector2(cell.x / 2, 27), 20, p.color)
 		var picture_area = Rect2(rect.position + Vector2(6, 34), Vector2(cell.x - 12, cell.y - 44))
 		var factor: float = minf(picture_area.size.x / 360, picture_area.size.y / 560)

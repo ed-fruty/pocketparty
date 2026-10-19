@@ -177,11 +177,11 @@ func corner_controls(_interactive: bool = true) -> void:
 func _draw() -> void:
 	var live: Array = living_ids()
 	round_clock("FINISH!" if finishing >= 0 and not live.is_empty() else "%ds · %d left" % [maxi(0, ceili(duration - time)), live.size()])
-	var lane_height: float = (size.y - 312 - max(0, roster.size() - 1) * 8) / max(1, roster.size())
 	for i in range(roster.size()):
 		var p: Dictionary = roster[i]
-		var lane = Rect2(8, 156 + (roster.size() - 1 - i) * (lane_height + 8), size.x - 16, lane_height)
-		draw_style_box(style(Color("182941") if alive[p.id] else Color("202535"), 16), lane)
+		var lane: Rect2 = player_field(p.id, 156, 156)
+		var lane_height: float = lane.size.y
+		draw_player_field(lane, p.id, Color("182941") if alive[p.id] else Color("202535"))
 		var ground: float = lane.end.y - 14
 		var runner_x: float = lane.position.x + lane.size.x * 0.2
 		var body_height: float = clampf(lane_height * 0.5, 30, 60)

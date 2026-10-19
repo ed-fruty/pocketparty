@@ -1,4 +1,4 @@
-# Data safety guidance — 0.3.2 (code 6)
+# Data safety guidance — 0.4.0 (code 7)
 
 Package: com.frutylabs.pocketparty. This is a proposed mapping for the shipped implementation, not a submitted Console declaration. Review it against the questions shown in your Console. The publisher receives no gameplay sessions; this does not automatically mean that nothing is collected under Google's off-device definition.
 

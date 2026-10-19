@@ -26,7 +26,7 @@ Signal Snap: Wait for green, then react. False starts cost points.
 
 BUILD A TOURNAMENT
 
-Pick several games and play them in your chosen order. Round results show the points each player earned and their running total. The highest total wins the tournament. Tied champions each raise their own red-diamond cup under falling confetti.
+Pick several games and play them in your chosen order. A clear tournament scoreboard shows every round, newly earned points, animated running totals and tied leaders. Reopen the full table from the cup ceremony. The highest total wins the tournament. Tied champions each raise their own red-diamond cup under falling confetti.
 
 MAKE EACH PLAYER YOUR OWN
 

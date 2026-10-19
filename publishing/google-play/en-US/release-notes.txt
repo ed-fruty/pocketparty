@@ -1,1 +1,1 @@
-Player fields now match their finger controls: P1/P2 at the bottom and P3/P4 at the top, with clear player-colored borders. Includes NetPlay over local Wi-Fi, all eight mini-games and tournaments.
+New tournament scoreboard! See points from every round, animated totals, and tied leaders on one clear page. Reopen the full table from the cup ceremony. NetPlay keeps the same round history on every device. Update all devices to this version to play together.

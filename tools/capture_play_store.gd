@@ -82,6 +82,18 @@ func ceremony(name: String) -> void:
 	await photo(name)
 	main.cup_done = false
 
+func scoreboard(name: String) -> void:
+	Party.start_session("sprint", true)
+	Party.schedule = ["sprint", "signal", "pairs", "burger", "darkspots", "obby", "snake", "dance"]
+	for index in range(8):
+		Party.round_index = index
+		Party.record_round({0: 9, 1: 9, 2: 5, 3: 0} if index % 2 == 0 else {0: 1, 1: 5, 2: 9, 3: 3})
+	main.cup_done = false
+	main.show_results()
+	await frames()
+	main.find_child("TournamentScoreboard", true, false).progress = 1
+	await photo(name)
+
 func _ready() -> void:
 	Party.save_path = "res://builds/store_capture_save.json"
 	Party.slots = ["Human", "Human", "Bot", "Bot"]
@@ -126,7 +138,8 @@ func _ready() -> void:
 			dark.activate(0)
 			dark._process(0.12)
 			await photo("07-darkspots")
-			await ceremony("08-tournament-cups")
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(directory.path_join("08-tournament-cups.png")))
+			await scoreboard("08-tournament-scoreboard")
 		else:
 			await set_size(Vector2i(1920, 1080) if device == "tablet-7-inch" else Vector2i(2560, 1440))
 			await snake("01-snake-clash")

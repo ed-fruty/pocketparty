@@ -2,7 +2,7 @@
 
 App: **4 Players Game Offline**  
 Package: **com.frutylabs.pocketparty**  
-Latest upload: **0.3.2, version code 6**
+Latest upload: **0.4.0, version code 7**
 Support: **ed.fruty@gmail.com**  
 Privacy policy: https://raw.githubusercontent.com/ed-fruty/pocketparty/main/PRIVACY_POLICY.md  
 Source: https://github.com/ed-fruty/pocketparty
@@ -10,7 +10,7 @@ Source: https://github.com/ed-fruty/pocketparty
 ## Upload order
 
 1. Create or open the Play Console app for this package. Use the English listing text in `listing/en-US/`.
-2. Upload `bundle/com.frutylabs.pocketparty-v6.aab` to the test or release track you intend to use. Version code 6 includes the final NetPlay policy/disclosure updates, refreshed store screenshots, and aligns player fields with their finger controls and adds player-colored field borders. It includes NetPlay over local Wi-Fi. Earlier AABs were delivered separately; do not attempt to replace an already-uploaded build with the same version code.
+2. Upload `bundle/com.frutylabs.pocketparty-v7.aab` to the test or release track you intend to use. Version code 7 adds the tournament scoreboard with animated totals, round-by-round points, tied leaders, and synchronized NetPlay history. It also includes aligned player fields, colored borders and the NetPlay policy/disclosure updates. It includes NetPlay over local Wi-Fi. Earlier AABs were delivered separately; do not attempt to replace an already-uploaded build with the same version code.
 3. Upload `graphics/app-icon-512.png` as the app icon and `graphics/feature-graphic-1024x500.png` as the feature graphic.
 4. Upload screenshots from the corresponding phone, 7-inch tablet, and 10-inch tablet folders. The first three phone gameplay screenshots can be ordered Snake Clash, Pair Peek, and Let's Dance; the library screenshot may follow them.
 5. Set the support email and privacy URL above. `store-settings.json` records the recommended listing values.
@@ -56,3 +56,5 @@ All screenshots are direct captures of the current application rendered at the s
 ## NetPlay update — disclosure review required
 
 This release adds optional same-Wi-Fi multiplayer and Android INTERNET permission. The earlier no-network build declarations must be reviewed before uploading this update. Read docs/NETPLAY.md and the updated PRIVACY_POLICY.md. NetPlay exchanges temporary connection information, skins, inputs and match state directly between devices. It has no publisher backend, analytics, names or chat; transport is not end-to-end encrypted. Do not declare all transmitted data encrypted. Review Data safety collection/ephemeral processing and user-initiated sharing exceptions against Google’s current definitions.
+
+NetPlay protocol 2 is required for the complete round history. Update every participating device to this release; old rooms are not shown as compatible.

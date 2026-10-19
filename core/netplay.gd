@@ -4,7 +4,7 @@ signal changed
 signal notice(message: String)
 const PORT = 47638
 const DISCOVERY_PORT = 47639
-const PROTOCOL = "pocketparty-netplay-1"
+const PROTOCOL = "pocketparty-netplay-2"
 const STATE = {
 	"common": ["scores", "time", "countdown", "duration", "paused", "ended", "feedback", "shown_steps", "signal_round", "signal_phase", "signal_clock", "lamp_pop"],
 	"pairs": ["deck", "opened", "matched", "turn", "pairs_found"],
@@ -239,7 +239,7 @@ func launch() -> void:
 	waiting = true
 	wait_started = Time.get_ticks_msec()
 	ready_peers = [1]
-	var data = {"ticket": ticket, "schedule": Party.schedule, "round": Party.round_index, "cup": Party.tournament, "standings": Party.standings, "room": room_data()}
+	var data = {"ticket": ticket, "schedule": Party.schedule, "round": Party.round_index, "cup": Party.tournament, "standings": Party.standings, "history": Party.round_history, "room": room_data()}
 	event.rpc("launch", data)
 	applying = true
 	ui.launch_round()
@@ -423,6 +423,7 @@ func event(kind: String, data: Dictionary) -> void:
 			Party.schedule = data.schedule.duplicate()
 			Party.round_index = int(data.round)
 			Party.standings = data.standings.duplicate()
+			Party.round_history = data.history.duplicate(true)
 			ui.launch_round()
 		"results":
 			if int(data.ticket) != ticket or screen != "game":

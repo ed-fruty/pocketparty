@@ -106,6 +106,7 @@ func host_test() -> void:
 	var before = Party.coins
 	ui.next_round()
 	await wait_seconds(0.3)
+	check(Party.round_history.size() == 2, "complete tournament round history")
 	check(Party.cup_winners == [0, 1], "tied cup winners")
 	check(Party.coins == before + 40, "own cup bonus")
 	NetPlay.ceremony()
@@ -139,6 +140,8 @@ func client_test() -> void:
 			captured["results"] = true
 		if ui.cup_done:
 			captured["cup"] = true
+			check(Party.round_history.size() == 2, "complete synced tournament history") if not captured.has("history") else null
+			captured["history"] = true
 		if captured.has("cup") and NetPlay.screen == "lobby":
 			break
 	for game in ["sprint", "signal", "pairs", "burger", "darkspots", "obby", "snake", "dance"]:

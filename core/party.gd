@@ -26,6 +26,7 @@ var tournament: bool = false
 var round_index: int = 0
 var standings: Dictionary = {}
 var round_points: Dictionary = {}
+var round_history: Array = []
 var schedule: Array = []
 var awarded_rounds: Dictionary = {}
 var cup_awarded: bool = false
@@ -54,6 +55,7 @@ func start_session(game_id: String, cup: bool) -> void:
 	round_index = 0
 	standings.clear()
 	round_points.clear()
+	round_history.clear()
 	awarded_rounds.clear()
 	cup_awarded = false
 	cup_winners.clear()
@@ -88,6 +90,8 @@ func record_round(scores: Dictionary, award_win: bool = true) -> Array:
 		standings[id] = int(standings.get(id, 0)) + round_points[id]
 	if not award_win:
 		winners.clear()
+	if tournament:
+		round_history.append({"round": round_index, "game": schedule[round_index] if round_index < schedule.size() else schedule[0], "scores": scores.duplicate(true), "points": round_points.duplicate(true), "totals": standings.duplicate(true), "winners": winners.duplicate()})
 	last_reward = 0
 	for id in winners:
 		if slots[id] == "Human" and (not NetPlay.active or id == NetPlay.local_id):

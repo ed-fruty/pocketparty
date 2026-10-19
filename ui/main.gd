@@ -1,6 +1,7 @@
 extends Control
 const GameArt = preload("res://ui/game_art.gd")
 const Avatar = preload("res://ui/avatar.gd")
+const Scoreboard = preload("res://ui/scoreboard.gd")
 const Ceremony = preload("res://ui/tournament_ceremony.gd")
 const Arena = preload("res://games/arena.gd")
 const Catalog = preload("res://core/catalog.gd")
@@ -124,6 +125,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		back()
 
 func back() -> void:
+	if page == "scoreboard":
+		show_cup_ceremony()
+		return
 	if NetPlay.active and page != "game":
 		if NetPlay.hosting and page in ["library", "results"]:
 			NetPlay.return_to_lobby()
@@ -267,7 +271,7 @@ func base(next_page: String, title: String, subtitle: String) -> void:
 func reflow() -> void:
 	if not is_instance_valid(outer):
 		return
-	var margin: int = 12 if page in ["game", "results"] else 28 if size.x < 1000 else 48
+	var margin: int = 12 if page in ["game", "results", "scoreboard"] else 28 if size.x < 1000 else 48
 	var inset = Vector4i(margin, margin, margin, margin)
 	if OS.has_feature("mobile"):
 		var safe = DisplayServer.get_display_safe_area()
@@ -575,6 +579,9 @@ func show_results() -> void:
 	if cup_done:
 		show_cup_ceremony()
 		return
+	if Party.tournament:
+		show_scoreboard()
+		return
 	base("results", "Cup champions!" if cup_done else "Round over!" if last_winners.is_empty() else "That's a wrap!", ("Try repeating every dance move in order!" if current_game == "dance" else "Everyone is out. Try jumping or ducking earlier!") if last_winners.is_empty() else winner_names(last_winners) + (" share the win." if last_winners.size() > 1 else " takes the win."))
 	var panels = grid(content, 2)
 	var summary = card(panels)
@@ -621,6 +628,10 @@ func show_cup_ceremony() -> void:
 	ceremony.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	ceremony.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_child(ceremony)
+	var score_link = button("All points", func(): show_scoreboard(true))
+	compact_net_button(score_link)
+	score_link.size_flags_horizontal = Control.SIZE_SHRINK_END
+	content.get_child(0).add_child(score_link)
 	var ranked: Array = Party.standings.keys()
 	ranked.sort_custom(func(a, b): return Party.standings[a] > Party.standings[b])
 	var table = grid(content, mini(4, ranked.size()))
@@ -881,3 +892,33 @@ func compact_net_button(control: Button) -> void:
 		compact.content_margin_top = 8
 		compact.content_margin_bottom = 8
 		control.add_theme_stylebox_override(state, compact)
+
+func show_scoreboard(from_ceremony: bool = false) -> void:
+	base("results", "Tournament scoreboard", "Final points · every round counts" if from_ceremony else "Round %d of %d complete · points added to your total" % [Party.round_index + 1, Party.schedule.size()])
+	if from_ceremony:
+		page = "scoreboard"
+	var board = Scoreboard.new()
+	board.name = "TournamentScoreboard"
+	board.roster = Party.players()
+	board.history = Party.round_history.duplicate(true)
+	board.schedule = Party.schedule.duplicate()
+	board.totals = Party.standings.duplicate()
+	board.animate_latest = not from_ceremony
+	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_child(board)
+	var description: String = "+%d gold · %s" % [Party.last_reward, "your device" if NetPlay.active else "shared device wallet"]
+	content.add_child(label(description + " · gold is separate from tournament points", 18, INK))
+	var actions = grid(content, 2)
+	if from_ceremony:
+		actions.add_child(button("Back to the cups", show_cup_ceremony, PURPLE))
+	elif NetPlay.active and not NetPlay.hosting:
+		actions.add_child(label("Waiting for the host to continue…", 20, INK))
+		actions.add_child(button("Leave NetPlay", leave_netplay))
+	else:
+		actions.add_child(button("Next round   →" if Party.round_index < Party.schedule.size() - 1 else "Award the cups   →", next_round, PURPLE))
+		actions.add_child(button("More games", show_library))
+	for child in actions.get_children():
+		if child is Button:
+			compact_net_button(child)
+	if Party.save_error:
+		content.add_child(label("Progress could not be saved on this device.", 18, Color("ffb276")))

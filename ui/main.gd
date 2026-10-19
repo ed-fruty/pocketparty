@@ -128,6 +128,8 @@ func back() -> void:
 		show_setup()
 	elif page == "setup":
 		show_home()
+	elif page in ["privacy", "licenses"]:
+		show_settings()
 	else:
 		show_home()
 
@@ -679,6 +681,7 @@ func show_settings() -> void:
 	rules.add_child(label("How it works", 28, PURPLE))
 	rules.add_child(label("• Choose any mix of 1–4 active seats, with at least one human. Solo humans can play without bots.\n\n• Each player taps their colored pad. Pair Peek shares a board: flip two cards, then pass the turn. A match earns one pair. Phones support simultaneous touches. Rotate whenever you like.\n\n• Round winners earn 15 gold each. Cup champions earn a bonus 40 gold. Ties share the win.\n\n• Build a tournament by selecting 2–8 previews. Games run in the order you pick them. Cup points: 10 × (active players − players with a higher score). Highest total wins.\n\n• Skins, gold, sound, and difficulty save locally. No network, account, or purchases required.", 21, MUTED))
 	content.add_child(button("Privacy policy", show_privacy))
+	content.add_child(button("Open source licenses", show_licenses))
 	content.add_child(label("4 PLAYERS GAME OFFLINE  /  PROTOTYPE 0.2", 16, SHELL_MUTED))
 
 func show_privacy() -> void:
@@ -688,3 +691,8 @@ func show_privacy() -> void:
 	body.add_child(label(policy.replace("**", "").replace("`", "").replace("## ", "").replace("# ", ""), 20, Color.WHITE))
 	content.add_child(button("Open policy online", func(): OS.shell_open("https://raw.githubusercontent.com/ed-fruty/pocketparty/main/PRIVACY_POLICY.md")))
 	content.add_child(button("Contact support", func(): OS.shell_open("mailto:ed.fruty@gmail.com")))
+
+func show_licenses() -> void:
+	base("licenses", "Open source licenses", "Godot Engine and third-party software notices")
+	var notices = FileAccess.get_file_as_string("res://publishing/google-play/GODOT_LICENSES.txt")
+	content.add_child(label(notices, 16, INK))

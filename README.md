@@ -68,3 +68,17 @@ Tests redirect saves to `builds/test_save.json` and remove the test save afterwa
 See `docs/design.md` for decisions and remaining polish. This is a playable prototype, not a store-ready release.
 
 The development laptop profile lives in `builds/laptop_party_save.json`; Android continues using its own `user://party_save.json`. Automated tests use separate temporary save files.
+
+## Google Play publishing
+
+Package: `com.frutylabs.pocketparty`. Public privacy policy: https://raw.githubusercontent.com/ed-fruty/pocketparty/main/PRIVACY_POLICY.md. Support: ed.fruty@gmail.com.
+
+The `Google Play` export preset builds release App Bundles; the `Android` preset keeps the debug APK workflow. Store listing source and upload notes live in `publishing/google-play/`. Generated bundles, screenshots, graphics, verification reports, and the upload ZIP live in ignored `builds/google-play/`.
+
+```sh
+python3 tools/build_google_play.py
+python3 tools/build_play_icon.py
+godot --path . tools/capture_play_store.tscn
+```
+
+Restore your private upload key and `signing.json` into `builds/play-console-private/` before building on another machine. Those files are deliberately absent from GitHub and the upload ZIP. Increment the Google Play preset's version code for each subsequent upload. Do not recreate a missing upload key for an existing app.

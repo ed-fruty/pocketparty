@@ -1,0 +1,42 @@
+One screen. Everyone plays.
+
+4 Players Game Offline brings eight small games to your Android phone or tablet. Play solo, add bots, or choose any mix of up to four human and bot players sharing the same device. No internet connection or online account is needed to play.
+
+CHOOSE YOUR CHALLENGE
+
+Snake Clash: Steer your colored snake, eat pizza to grow, and absorb smaller snakes. Becoming the biggest starts a 10-second hunt. A new biggest snake restarts the timer.
+
+Let's Dance!: One chosen player creates five dance moves. Watch the sequence, then repeat every move in the right order. A solo player copies a virtual dance teacher.
+
+Obby Run: Run automatically, jump over blocks, and duck under bars. Hit an obstacle and you are out. The last runner standing wins.
+
+BurgerTower: Drop buns and toppings onto a plate. Build a tall burger tower with ingredients that slide, tilt, and topple.
+
+Pair Peek: Turn over two hidden cards and find matching pairs. Take turns and try to remember what everyone reveals.
+
+Darkspots: Time your tap as the moving circle overlaps the gold range on a rainbow square. Each hit earns five points.
+
+Star Sprint: Tap your control to race toward the finish line.
+
+Signal Snap: Wait for green, then react. False starts cost points.
+
+BUILD A TOURNAMENT
+
+Pick several games and play them in your chosen order. Round results show the points each player earned and their running total. The highest total wins the tournament. Tied champions each raise their own red-diamond cup under falling confetti.
+
+MAKE EACH PLAYER YOUR OWN
+
+Earn in-game gold from wins and tournaments, then unlock and equip player skins including Rabbit, Koala, Panda, and Capybara. Gold and unlocked skins are saved locally on the device.
+
+MADE FOR SHARING
+
+- One to four active players, including human and bot combinations
+- Portrait and landscape layouts on phones and tablets
+- Colored player controls, visible bot indicators, and animated feedback
+- Optional background music and sound effects
+- Offline play with no ads or in-app purchases
+
+Some games use simultaneous controls and others use turns or a shared board. Choose the roster first, then tap a game preview or select a tournament.
+
+Support: ed.fruty@gmail.com
+Privacy policy: https://raw.githubusercontent.com/ed-fruty/pocketparty/main/PRIVACY_POLICY.md

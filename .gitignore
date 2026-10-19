@@ -1,0 +1,14 @@
+.godot/
+builds/*
+!builds/.gitkeep
+*.tmp
+
+!builds/.gdignore
+
+# Generated Android Gradle project and private signing material
+android/build/
+android/.build_version
+*.jks
+*.keystore
+.env
+.env.*

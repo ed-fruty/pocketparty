@@ -35,6 +35,8 @@ var seat_summary: Label
 var seat_continue: Button
 
 func _ready() -> void:
+	NetPlay.ui = self
+	NetPlay.changed.connect(net_changed)
 	var theme_new = Theme.new()
 	theme_new.default_font_size = 22
 	theme = theme_new
@@ -122,6 +124,14 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		back()
 
 func back() -> void:
+	if NetPlay.active and page != "game":
+		if NetPlay.hosting and page in ["library", "results"]:
+			NetPlay.return_to_lobby()
+		else:
+			leave_netplay()
+		return
+	if page == "netplay":
+		NetPlay.stop_scan()
 	if page == "game":
 		toggle_pause()
 	elif page == "library":
@@ -286,6 +296,9 @@ func avatar(parent: Node, id: int, skin: String, height: float = 100) -> Control
 	return a
 
 func show_home() -> void:
+	if NetPlay.active:
+		NetPlay.leave()
+	NetPlay.stop_scan()
 	base("home", "Small games.\nBig rivalries.", "Your people. One screen. No internet needed.")
 	# Keep the introduction beside the actions in landscape, stacked in portrait.
 	var heading = content.get_child(1)
@@ -310,13 +323,19 @@ func show_home() -> void:
 	actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	actions.alignment = BoxContainer.ALIGNMENT_CENTER
-	actions.add_child(button("Let's play   →", func(): cup_mode = false; show_setup(), PURPLE))
+	actions.add_child(button("Play on One Device   →", func(): cup_mode = false; show_setup(), PURPLE))
 	actions.add_child(button("Build a tournament", func(): cup_mode = true; show_setup()))
+	actions.add_child(button("NetPlay · Play over Wi-Fi", show_netplay, Color("6ce5bc")))
 	actions.add_child(button("Player skins", show_shop))
 	actions.add_child(button("Settings & how to play", show_settings))
 	actions.add_child(label("OFFLINE BY DESIGN · NO ADS · NO ACCOUNTS", 16, SHELL_MUTED))
 
 func show_library() -> void:
+	if NetPlay.active:
+		if not NetPlay.hosting:
+			show_net_waiting()
+			return
+		NetPlay.show_library()
 	base("library", "Pick & play.", "Tap a preview to play. Or collect games for your own tournament.")
 	var roster_line = HBoxContainer.new()
 	roster_line.add_theme_constant_override("separation", 8)
@@ -463,6 +482,9 @@ func choose_seat_mode(seat_id: int, mode: String) -> void:
 	seat_continue.disabled = not Party.valid_setup()
 
 func launch_round() -> void:
+	if NetPlay.active and NetPlay.hosting and not NetPlay.applying:
+		NetPlay.launch()
+		return
 	current_game = Party.schedule[Party.round_index]
 	base("game", Catalog.entry(current_game).title, "Round %d / %d  ·  %s" % [Party.round_index + 1, Party.schedule.size(), "Take turns · tap two cards" if current_game == "pairs" else "Tap your own color"])
 	# Games use all remaining height without a scrolling playfield.
@@ -483,6 +505,8 @@ func launch_round() -> void:
 	arena.custom_minimum_size.y = 300
 	arena.finished.connect(round_finished)
 	content.add_child(arena)
+	if NetPlay.active:
+		NetPlay.attach(arena)
 	var pause_button = button("Ⅱ", toggle_pause)
 	for state in ["normal", "hover", "pressed", "disabled"]:
 		var compact = pause_button.get_theme_stylebox(state).duplicate()
@@ -499,9 +523,14 @@ func launch_round() -> void:
 	arena.resized.connect(func(): pause_button.position = Vector2(arena.size.x / 2 + 113, 8))
 
 func toggle_pause() -> void:
+	if NetPlay.active and not NetPlay.hosting:
+		show_net_leave_overlay()
+		return
 	if not is_instance_valid(arena):
 		return
 	arena.paused = not arena.paused
+	if NetPlay.active:
+		NetPlay.pause_game(arena.paused)
 	if not arena.paused:
 		if is_instance_valid(pause_overlay):
 			pause_overlay.queue_free()
@@ -516,7 +545,11 @@ func toggle_pause() -> void:
 	c.custom_minimum_size.x = 360
 	c.add_child(label("Take a breather.", 38))
 	c.add_child(button("Resume game", toggle_pause, PURPLE))
-	c.add_child(button("Leave match", show_home))
+	c.add_child(button("Leave match", func():
+		if NetPlay.active:
+			NetPlay.return_to_lobby()
+		else:
+			show_home()))
 
 func round_finished(scores: Dictionary) -> void:
 	last_scores = scores
@@ -527,6 +560,8 @@ func round_finished(scores: Dictionary) -> void:
 		elif current_game == "dance":
 			no_winner = not arena.has_winner()
 	last_winners = Party.record_round(scores, not no_winner)
+	if NetPlay.active and NetPlay.hosting:
+		NetPlay.results(scores, not no_winner)
 	cup_done = false
 	call_deferred("show_results")
 
@@ -547,9 +582,9 @@ func show_results() -> void:
 	var winners = HBoxContainer.new()
 	summary.add_child(winners)
 	for id in last_winners:
-		avatar(winners, id, Party.equipped[id], 64)
+		avatar(winners, id, NetPlay.skins[id] if NetPlay.active else Party.equipped[id], 64)
 	summary.add_child(label("+%d gold" % Party.last_reward, 28, Color("ffd577")))
-	summary.add_child(label("Shared wallet · bot wins earn no gold", 16, MUTED))
+	summary.add_child(label("Your device’s gold · only your wins earn rewards" if NetPlay.active else "Shared wallet · bot wins earn no gold", 16, MUTED))
 	var c = card(panels)
 	c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	c.add_theme_constant_override("separation", 8)
@@ -562,6 +597,10 @@ func show_results() -> void:
 		c.add_child(label("Player %d%s     %d %s" % [id + 1, " · BOT" if Party.slots[id] == "Bot" else "", values[id], Catalog.entry(current_game).unit], 21, Party.COLORS[id]))
 		if Party.tournament:
 			c.add_child(label("+%d points   ·   %d total" % [Party.round_points.get(id, 0), Party.standings.get(id, 0)], 18, Color("ffd577")))
+	if NetPlay.active and not NetPlay.hosting:
+		content.add_child(label("Waiting for the host to choose the next round…", 21, INK))
+		content.add_child(button("Leave NetPlay", leave_netplay))
+		return
 	var actions = grid(content, 2)
 	if Party.tournament and not cup_done:
 		actions.add_child(button("Next round   →" if Party.round_index < Party.schedule.size() - 1 else "Award the cups   →", next_round, PURPLE))
@@ -599,6 +638,10 @@ func show_cup_ceremony() -> void:
 		cell.get_parent().add_theme_stylebox_override("panel", compact)
 		cell.add_child(label("P%d%s%s" % [id + 1, " BOT" if Party.slots[id] == "Bot" else "", " · WINNER" if last_winners.has(id) else ""], 17, Party.COLORS[id]))
 		cell.add_child(label("%d points" % Party.standings[id], 22, Color("ffd577") if last_winners.has(id) else Color.WHITE))
+	if NetPlay.active and not NetPlay.hosting:
+		content.add_child(label("+%d gold · your tournament bonus" % Party.last_reward, 18, INK))
+		content.add_child(button("Leave NetPlay", leave_netplay))
+		return
 	var actions = grid(content, 2)
 	actions.add_child(button("New tournament   →", func(): cup_mode = true; show_library(), PURPLE))
 	actions.add_child(button("More games", show_library))
@@ -619,6 +662,8 @@ func next_round() -> void:
 	else:
 		last_winners = Party.finish_cup()
 		cup_done = true
+		if NetPlay.active:
+			NetPlay.ceremony()
 		show_results()
 
 func show_shop(message: String = "") -> void:
@@ -696,3 +741,143 @@ func show_licenses() -> void:
 	base("licenses", "Open source licenses", "Godot Engine and third-party software notices")
 	var notices = FileAccess.get_file_as_string("res://publishing/google-play/GODOT_LICENSES.txt")
 	content.add_child(label(notices, 16, INK))
+
+func show_netplay() -> void:
+	base("netplay", "NetPlay", "Your friends. Their phones. One Wi-Fi network.")
+	content.add_child(label("No internet account needed. Connect every device to the same private Wi-Fi. Use the same game version on every device.", 21, INK))
+	if not NetPlay.status.is_empty():
+		content.add_child(label(NetPlay.status, 22, INK))
+	content.add_child(button("Create Room", func():
+		NetPlay.stop_scan()
+		if NetPlay.host() == OK:
+			show_net_lobby()
+		else:
+			show_netplay(), PURPLE))
+	content.add_child(label("Join a friend", 28, INK))
+	var address = LineEdit.new()
+	address.name = "HostAddress"
+	address.placeholder_text = "Host IP address · e.g. 192.168.1.12"
+	address.custom_minimum_size.y = 60
+	address.add_theme_font_size_override("font_size", 22)
+	content.add_child(address)
+	content.add_child(button("Join Room", func():
+		var target: String = address.text.strip_edges()
+		NetPlay.stop_scan()
+		if NetPlay.join(target) == OK:
+			show_net_lobby()
+		else:
+			show_netplay(), Color("6ce5bc")))
+	var nearby = column(content)
+	nearby.name = "NearbyRooms"
+	content.add_child(button("Refresh nearby rooms", func(): NetPlay.scan(); refresh_net_rooms()))
+	content.add_child(button("Back", func(): NetPlay.stop_scan(); show_home()))
+	NetPlay.scan()
+	refresh_net_rooms()
+
+func refresh_net_rooms() -> void:
+	if page != "netplay":
+		return
+	var nearby = content.get_node_or_null("NearbyRooms")
+	if nearby == null:
+		return
+	for child in nearby.get_children():
+		nearby.remove_child(child)
+		child.queue_free()
+	nearby.add_child(label("Nearby rooms" if not NetPlay.rooms.is_empty() else "Looking for rooms… You can also enter the host’s address above.", 19, INK))
+	for address in NetPlay.rooms:
+		nearby.add_child(button("Join %s · %d/4 friends" % [address, NetPlay.rooms[address].seats], func():
+			NetPlay.stop_scan()
+			if NetPlay.join(address) == OK:
+				show_net_lobby()
+			else:
+				show_netplay()))
+
+func net_changed() -> void:
+	if page == "netplay":
+		refresh_net_rooms()
+	elif page == "net_lobby" and NetPlay.screen == "lobby":
+		call_deferred("show_net_lobby")
+
+func show_net_lobby() -> void:
+	if NetPlay.active and NetPlay.screen != "lobby":
+		return
+	if not NetPlay.active:
+		show_netplay()
+		return
+	base("net_lobby", "NetPlay · Room", "You are Player %d · %s" % [NetPlay.local_id + 1, "HOST" if NetPlay.hosting else "FRIEND"] if NetPlay.local_id >= 0 else "Connecting to your friend…")
+	content.add_theme_constant_override("separation", 10)
+	var back_button = content.get_child(1)
+	content.remove_child(back_button)
+	content.get_child(0).add_child(back_button)
+	back_button.size_flags_horizontal = Control.SIZE_SHRINK_END
+	compact_net_button(back_button)
+	content.get_child(1).add_theme_font_size_override("font_size", 34)
+	if NetPlay.hosting:
+		content.add_child(label("Friends can find this room nearby, or enter: " + NetPlay.addresses, 18, INK))
+	if not NetPlay.status.is_empty():
+		content.add_child(label(NetPlay.status, 21, INK))
+	var seats = grid(content, 4)
+	responsive_grids.back().portrait = 2
+	seats.columns = 4 if size.x > size.y else 2
+	for i in range(4):
+		var c = card(seats)
+		var seat_style = box(PANEL, 20)
+		seat_style.content_margin_top = 12
+		seat_style.content_margin_bottom = 12
+		seat_style.content_margin_left = 12
+		seat_style.content_margin_right = 12
+		c.get_parent().add_theme_stylebox_override("panel", seat_style)
+		c.add_theme_constant_override("separation", 6)
+		c.get_parent().size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		avatar(c, i, NetPlay.skins[i], 48)
+		var occupied: bool = NetPlay.peers.values().has(i)
+		var caption: String = "HOST" if i == 0 else "CONNECTED FRIEND" if occupied else "BOT" if Party.slots[i] == "Bot" else "EMPTY"
+		c.add_child(label("P%d · %s%s" % [i + 1, caption, " · YOU" if NetPlay.local_id == i else ""], 18, Party.COLORS[i]))
+		if NetPlay.hosting and not occupied:
+			var row = HBoxContainer.new()
+			c.add_child(row)
+			for mode in ["Bot", "Off"]:
+				row.add_child(button(("✓ " if Party.slots[i] == mode else "") + ("Empty" if mode == "Off" else "Bot"), func(): NetPlay.set_seat(i, mode), Party.COLORS[i] if Party.slots[i] == mode else PANEL))
+				compact_net_button(row.get_child(row.get_child_count() - 1))
+	if NetPlay.hosting:
+		content.add_child(button("Choose game or tournament   →", func(): cup_mode = false; show_library(), PURPLE))
+		compact_net_button(content.get_child(content.get_child_count() - 1))
+	else:
+		content.add_child(label("The host chooses the game or tournament. Your gold and skins stay on this device.", 21, INK))
+	content.add_child(button("Close Room" if NetPlay.hosting else "Leave Room", leave_netplay))
+	compact_net_button(content.get_child(content.get_child_count() - 1))
+
+func show_net_waiting() -> void:
+	base("net_wait", "NetPlay · Get ready", "The host is choosing your game or tournament.")
+	content.add_child(label("You are Player %d. Play using your own color. Only your wins add gold to this device." % (NetPlay.local_id + 1), 24, INK))
+	content.add_child(button("Leave Room", leave_netplay))
+
+func leave_netplay() -> void:
+	NetPlay.leave()
+	show_home()
+
+func show_net_leave_overlay() -> void:
+	if is_instance_valid(pause_overlay):
+		pause_overlay.queue_free()
+		return
+	pause_overlay = PanelContainer.new()
+	pause_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	pause_overlay.add_theme_stylebox_override("panel", box(Color(0.035, 0.047, 0.09, 0.96)))
+	add_child(pause_overlay)
+	var center = CenterContainer.new()
+	pause_overlay.add_child(center)
+	var c = column(center)
+	c.add_child(label("The match keeps playing.", 30))
+	c.add_child(button("Keep playing", func(): pause_overlay.queue_free()))
+	c.add_child(button("Leave NetPlay", leave_netplay))
+
+func compact_net_button(control: Button) -> void:
+	control.custom_minimum_size.y = 48
+	control.add_theme_font_size_override("font_size", 18)
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		var compact = control.get_theme_stylebox(state).duplicate()
+		compact.content_margin_left = 10
+		compact.content_margin_right = 10
+		compact.content_margin_top = 8
+		compact.content_margin_bottom = 8
+		control.add_theme_stylebox_override(state, compact)

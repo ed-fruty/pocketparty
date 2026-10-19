@@ -1,3 +1,1 @@
-Eight offline mini-games for one to four players sharing a device.
-Mix friends and bots, build tournaments, earn gold, and unlock player skins.
-Includes portrait and landscape layouts, background music, and tournament cups for every tied champion.
+NetPlay is here! Create or join a room on the same Wi-Fi and play all eight mini-games on separate devices. Add bots, build tournaments, and earn gold on your own device. Includes clear player controls and connection handling.

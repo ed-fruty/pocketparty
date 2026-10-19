@@ -59,6 +59,8 @@ func pose(id: int, move: int) -> void:
 	queue_redraw()
 
 func choose_move(id: int, move: int) -> void:
+	if NetPlay.intercept(id, "move", move):
+		return
 	if move < 0 or move >= MOVES.size() or not can_move(id):
 		return
 	pose(id, move)
@@ -114,6 +116,8 @@ func finish_copy() -> void:
 	feedback_text = "Perfect dance!" if not successes.is_empty() else "The leader wins!" if leader_id >= 0 else "Try the full sequence again!"
 
 func _process(delta: float) -> void:
+	if NetPlay.client_frame(self, delta):
+		return
 	if paused or ended:
 		return
 	if countdown > 0:
@@ -168,7 +172,7 @@ func activate(id: int) -> void:
 
 func corner_at(pos: Vector2) -> int:
 	for p in roster:
-		if p.bot or not can_move(p.id) or not move_pads.has(p.id):
+		if p.bot or not NetPlay.can_control(p.id) or not can_move(p.id) or not move_pads.has(p.id):
 			continue
 		for move in range(MOVES.size()):
 			if move_pads[p.id][move].has_point(pos):
@@ -210,10 +214,10 @@ func corner_controls(_interactive: bool = true) -> void:
 			pos.x = (size.x - 176) / 2 if roster.size() == 1 else (8.0 if roster.find(p) == 0 else size.x - 184)
 		var rect = Rect2(pos, Vector2(176, 156))
 		pads[p.id] = rect
-		var enabled: bool = can_move(p.id)
+		var enabled: bool = can_move(p.id) and NetPlay.can_control(p.id)
 		var color: Color = p.color if enabled else p.color.darkened(0.45)
 		draw_style_box(style(Color("18233b"), 18), rect)
-		text_at("P%d · %s" % [p.id + 1, "BOT" if p.bot else player_status(p.id)], pos + Vector2(88 if p.bot else 76, 24), 14, p.color)
+		text_at("P%d · %s" % [p.id + 1, "BOT" if p.bot else "FRIEND" if not NetPlay.can_control(p.id) else player_status(p.id)], pos + Vector2(88 if p.bot else 76, 24), 14, p.color)
 		if p.bot:
 			draw_robot_control(pos + Vector2(88, 76))
 			text_at("BOT · " + player_status(p.id), pos + Vector2(88, 132), 17, Color("a4afc8"))

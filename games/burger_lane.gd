@@ -14,6 +14,8 @@ var settled_height: float = 0.0
 var preview_x: float = 180.0
 var preview_y: float = 80.0
 var count: int = 0
+var network_pieces: Array = []
+var network_camera: Vector2 = Vector2(180, 380)
 var freeze_state: bool = true
 var stored_motion: Dictionary = {}
 
@@ -58,6 +60,14 @@ func measure() -> float:
 	return maxf(0, FLOOR_Y - highest)
 
 func _process(delta: float) -> void:
+	if NetPlay.active and not NetPlay.hosting:
+		var blend: float = 1.0 - exp(-delta * 25)
+		for i in range(mini(pieces.size(), network_pieces.size())):
+			pieces[i].position = pieces[i].position.lerp(network_pieces[i][3], blend)
+			pieces[i].rotation = lerp_angle(pieces[i].rotation, network_pieces[i][4], blend)
+		camera.position = camera.position.lerp(network_camera, blend)
+		queue_redraw()
+		return
 	if active:
 		clock += delta
 		cooldown = maxf(0, cooldown - delta)
@@ -68,6 +78,8 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _physics_process(_delta: float) -> void:
+	if NetPlay.active and not NetPlay.hosting:
+		return
 	if active:
 		camera.position.y = lerpf(camera.position.y, minf(380, preview_y + 180), 1.0 - exp(-_delta * 4))
 	if freeze_state != not active:
@@ -120,3 +132,31 @@ func _draw() -> void:
 		draw_set_transform(Vector2(preview_x, preview_y), sin(clock * 3) * 0.025)
 		Ingredient.draw_food(self, next_kind, [108,116,100,110,96,112][next_kind], [28,18,24,17,20,30][next_kind])
 		draw_set_transform(Vector2.ZERO)
+
+func apply_network(data: Dictionary) -> void:
+	active = false
+	for field in ["clock", "preview_x", "preview_y", "next_kind", "cooldown", "accepting"]:
+		set(field, data[field])
+	network_camera = data.camera
+	network_pieces = data.pieces
+	while pieces.size() > data.pieces.size():
+		var old = pieces.pop_back()
+		old.queue_free()
+	for i in range(data.pieces.size()):
+		var value: Array = data.pieces[i]
+		if i >= pieces.size():
+			var piece = Ingredient.new()
+			piece.freeze = true
+			piece.position = value[3]
+			piece.rotation = value[4]
+			piece.collision_layer = 0
+			piece.collision_mask = 0
+			add_child(piece)
+			piece.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+			pieces.append(piece)
+		var item = pieces[i]
+		item.kind = value[0]
+		item.width = value[1]
+		item.height = value[2]
+		item.queue_redraw()
+	queue_redraw()

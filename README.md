@@ -1,6 +1,6 @@
 # 4 Players Game Offline
 
-An original offline, same-device party-game foundation built with Godot 4.7.2 / GDScript. Android phones and tablets, portrait and landscape. All project source, original artwork, test captures, APK output, and emulator writable data live in this directory. The sibling Godot projects were read only as references.
+An original offline party-game collection with same-device play and optional NetPlay over local Wi-Fi built with Godot 4.7.2 / GDScript. Android phones and tablets, portrait and landscape. All project source, original artwork, test captures, APK output, and emulator writable data live in this directory. The sibling Godot projects were read only as references.
 
 ## Play
 
@@ -23,11 +23,15 @@ Or open `project.godot` in Godot and press F6/F5. Android debug build: `builds/p
 
 Rounds fill the screen. Touch the white finger labelled with your player number and color. In portrait, one active seat uses bottom center and two active seats use the bottom corners. P1 and P2 start in the bottom corners in both orientations; P3 and P4 use the top corners. Bot controls use muted robot icons and large BOT labels instead of fingers, and reject human taps. Pair Peek uses shared cards: a colored YOUR TURN banner and card borders identify the current player; other player indicators are dimmed and labelled WAIT. Mouse works on desktop. Menus support touch swipes, mouse dragging, wheels, and trackpad scrolling. The skin shop preserves its scroll position after purchases/equips. Keyboard: P1 **A**, P2 **L**, P3 **Z**, P4 **M**. Pair Peek: arrows + Space/Enter. Escape / Android Back pauses during games. Leaving the app pauses the round. Menus scroll on short screens.
 
+## NetPlay
+
+Home → **NetPlay** → **Create Room** or **Join Room**. Friends on the same private Wi-Fi join through nearby discovery or the host IP address. P1 hosts; P2–P4 are connected friends, bots or empty seats. The host chooses games/tournaments and advances rounds. Each phone controls only its own seat and receives only its own earned gold in its existing local wallet. No account, backend or internet connection is required. [Details and testing](docs/NETPLAY.md).
+
 ## Progress and skins
 
 Round winners receive 15 gold each; human tournament champions receive another 40 gold each. Ties pay each human winner. Bot wins pay no gold. Gold is a shared device wallet, with skins individually equipped on the four player seats. Cup scoring: `10 × (active seats − seats with a higher score)`. Round results show points earned and cumulative tournament totals. Highest total wins. The final ceremony raises one gold cup with a red diamond for every tied champion, with animated confetti; non-winners stand still. Payouts are idempotent.
 
-Ten original procedural skins: party pals, cats, robots, royals, ninjas, aliens, Rabbit (30 gold), Koala (45), Panda (60), and Capybara (75). Animal skins wear the player’s colored scarf. Gold, owned/equipped skins, difficulty, music, and sound effects save in Godot's local `user://party_save.json`. The app needs no internet permission, ads, login, or purchases. Saves are local to each installation.
+Ten original procedural skins: party pals, cats, robots, royals, ninjas, aliens, Rabbit (30 gold), Koala (45), Panda (60), and Capybara (75). Animal skins wear the player’s colored scarf. Gold, owned/equipped skins, difficulty, music, and sound effects save in Godot's local `user://party_save.json`. The app has no ads, login, or purchases. Optional NetPlay uses Android INTERNET permission for local Wi-Fi sockets; single-device gameplay remains offline. Saves are local to each installation.
 
 ## Structure
 

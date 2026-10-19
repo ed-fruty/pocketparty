@@ -8,11 +8,19 @@ Contact: ed.fruty@gmail.com
 
 ## Offline gameplay
 
-4 Players Game Offline is a collection of local mini-games for one to four players on the same device. It does not require an online account or an internet connection to play.
+4 Players Game Offline is a collection of local mini-games for one to four players. You can play on one device, or choose NetPlay to play with friends on separate devices connected to the same local Wi-Fi network. Neither mode requires an online account or an internet connection.
 
 ## Data collection and sharing
 
-The game does not collect or transmit personal information to the publisher. It does not include advertising, analytics, tracking, online chat, online multiplayer, or third-party data-collection SDKs. We do not sell or share player data.
+The game does not collect or transmit personal information to the publisher. It does not include advertising, analytics, tracking, chat, internet matchmaking, or third-party data-collection SDKs. We do not sell player data. Optional NetPlay exchanges the limited local-network information described below directly between participating devices.
+
+## Optional NetPlay local-network sessions
+
+When you choose Create Room or Join Room, the game communicates directly with other participating devices on your local network. The host device runs the match. Devices exchange temporary connection identifiers, player seat numbers, equipped skin choices, control inputs, game state, scores, and round/tournament results. Local IP addresses are used to discover rooms and establish connections; a host address may be displayed in the room browser or entered manually. Nearby-room announcements are visible to devices listening on the same local network while a room is open.
+
+The publisher does not operate a matchmaking or game server and does not receive these sessions. Room membership and network addresses are used in memory for the session and are not intentionally written to persistent gameplay saves or analytics logs. Your device saves your own earned gold and progress locally; it does not upload your wallet, full skin inventory, or a real-world identity to other players or to the publisher. NetPlay does not provide cloud accounts, cross-device progress synchronization, names, messages, or public profiles.
+
+Use NetPlay with trusted friends on a private network. Local gameplay packets are not end-to-end encrypted. You can stop participating by leaving the room; no background room discovery is performed outside the NetPlay join screen. Leaving or disconnecting ends the session connection, while locally earned progress remains on your device.
 
 ## Information saved on your device
 
@@ -22,7 +30,7 @@ You can remove this local information by clearing the app's storage in Android s
 
 ## Device permissions
 
-The Android game does not request access to your contacts, precise location, camera, microphone, or advertising identifier. Gameplay does not need network access.
+The Android game does not request access to your contacts, precise location, camera, microphone, or advertising identifier. Single-device gameplay does not need network access. Optional NetPlay uses Android network access permission for direct local-network communication. On Android versions and target SDKs that require a separate local-network permission, the game must obtain that permission before enabling NetPlay; single-device play remains available if access is denied.
 
 ## External links and support
 

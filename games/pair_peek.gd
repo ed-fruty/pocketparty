@@ -29,6 +29,8 @@ func _ready() -> void:
 		flips.append(0.0)
 
 func _process(delta: float) -> void:
+	if NetPlay.client_frame(self, delta):
+		return
 	if paused or ended:
 		return
 	if countdown > 0:
@@ -51,6 +53,8 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func choose_card(index: int, by_bot: bool = false) -> void:
+	if NetPlay.intercept(roster[turn].id, "card", index):
+		return
 	if ended or paused or countdown > 0 or index < 0 or index >= 16 or opened.size() >= 2 or matched.has(index) or opened.has(index):
 		return
 	if roster[turn].bot != by_bot:
@@ -121,6 +125,8 @@ func control_label(id: int, bot: bool) -> String:
 	return "P%d · %s" % [id + 1, ("BOT" if bot else "TURN") if control_is_highlighted(id) else "WAIT"]
 
 func turn_instruction() -> String:
+	if not roster[turn].bot and not NetPlay.can_control(roster[turn].id):
+		return "Your friend is choosing · please wait"
 	if roster[turn].bot:
 		return "Bot is choosing · please wait"
 	if opened.size() == 2:
@@ -174,7 +180,7 @@ func _draw() -> void:
 	var banner = Rect2(banner_inset, 53, size.x - banner_inset * 2, 54)
 	draw_style_box(style(active.color.darkened(0.68), 14), banner)
 	draw_style_box(card_outline(active.color), banner)
-	text_at("PLAYER %d · %s" % [active.id + 1, "BOT'S TURN" if active.bot else "YOUR TURN"], Vector2(size.x * 0.5, 75), 22, active.color)
+	text_at("PLAYER %d · %s" % [active.id + 1, "BOT'S TURN" if active.bot else ("YOUR TURN" if NetPlay.can_control(active.id) else "FRIEND’S TURN")], Vector2(size.x * 0.5, 75), 22, active.color)
 	text_at(turn_instruction(), Vector2(size.x * 0.5, 97), 17, Color.WHITE)
 	if countdown > 0:
 		draw_style_box(style(Color(0.035, 0.047, 0.09, 0.94)), Rect2(Vector2.ZERO, size))

@@ -43,7 +43,7 @@ func players() -> Array:
 	var result: Array = []
 	for i in range(4):
 		if slots[i] != "Off":
-			result.append({"id": i, "name": "Player %d" % (i + 1), "bot": slots[i] == "Bot", "skin": equipped[i], "color": COLORS[i]})
+			result.append({"id": i, "name": "Player %d" % (i + 1), "bot": slots[i] == "Bot", "skin": NetPlay.skins[i] if NetPlay.active else equipped[i], "color": COLORS[i]})
 	return result
 
 func valid_setup() -> bool:
@@ -90,7 +90,7 @@ func record_round(scores: Dictionary, award_win: bool = true) -> Array:
 		winners.clear()
 	last_reward = 0
 	for id in winners:
-		if slots[id] == "Human":
+		if slots[id] == "Human" and (not NetPlay.active or id == NetPlay.local_id):
 			last_reward += 15
 	coins += last_reward
 	awarded_rounds[round_index] = winners
@@ -110,7 +110,7 @@ func finish_cup() -> Array:
 			winners.append(id)
 	last_reward = 0
 	for id in winners:
-		if slots[id] == "Human":
+		if slots[id] == "Human" and (not NetPlay.active or id == NetPlay.local_id):
 			last_reward += 40
 	coins += last_reward
 	cup_awarded = true
@@ -131,7 +131,7 @@ func save_progress() -> void:
 	var file = FileAccess.open(save_path, FileAccess.WRITE)
 	save_error = file == null
 	if file:
-		file.store_string(JSON.stringify({"version": 1, "coins": coins, "owned": owned, "equipped": equipped, "difficulty": difficulty, "sound": sound, "music": music_enabled}))
+		file.store_string(JSON.stringify({"version": 1, "coins": coins, "owned": owned, "equipped": equipped, "difficulty": NetPlay.saved_difficulty if NetPlay.active else difficulty, "sound": sound, "music": music_enabled}))
 
 func load_progress() -> void:
 	if not FileAccess.file_exists(save_path):

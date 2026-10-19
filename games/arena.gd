@@ -63,6 +63,8 @@ func new_signal() -> void:
 		bot_delay[p.id] = rng.randf_range(0.23, 0.65) * [1.6, 1.0, 0.65][Party.difficulty]
 
 func _process(delta: float) -> void:
+	if NetPlay.client_frame(self, delta):
+		return
 	if paused or ended:
 		return
 	if countdown > 0:
@@ -106,6 +108,8 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func activate(id: int) -> void:
+	if NetPlay.intercept(id, "tap"):
+		return
 	if ended or paused or countdown > 0 or not scores.has(id):
 		return
 	if game_id == "sprint":
@@ -131,6 +135,8 @@ func activate(id: int) -> void:
 	queue_redraw()
 
 func complete() -> void:
+	if NetPlay.active and not NetPlay.hosting:
+		return
 	if ended:
 		return
 	ended = true
@@ -171,11 +177,13 @@ func _input(event: InputEvent) -> void:
 
 func corner_at(local_pos: Vector2) -> int:
 	for p in roster:
-		if not p.bot and pads.has(p.id) and pads[p.id].has_point(local_pos):
+		if not p.bot and NetPlay.can_control(p.id) and pads.has(p.id) and pads[p.id].has_point(local_pos):
 			return p.id
 	return -1
 
 func press_corner(id: int) -> void:
+	if not NetPlay.dispatching and not NetPlay.can_control(id):
+		return
 	finger_press_times[id] = Time.get_ticks_msec()
 	animate_finger(id, true)
 	activate(id)
@@ -218,7 +226,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 func press_at(pos: Vector2) -> void:
 	for p in roster:
-		if not p.bot and pads.has(p.id) and pads[p.id].has_point(pos):
+		if not p.bot and NetPlay.can_control(p.id) and pads.has(p.id) and pads[p.id].has_point(pos):
 			press_corner(p.id)
 			return
 
@@ -274,7 +282,7 @@ func control_is_highlighted(_id: int) -> bool:
 	return true
 
 func control_label(id: int, bot: bool) -> String:
-	return "P%d · %s" % [id + 1, "BOT" if bot else "TAP"]
+	return "P%d · %s" % [id + 1, "BOT" if bot else "FRIEND" if not NetPlay.can_control(id) else "YOU · TAP" if NetPlay.active else "TAP"]
 
 func corner_controls(interactive: bool = true) -> void:
 	pads.clear()
@@ -310,7 +318,7 @@ func corner_controls(interactive: bool = true) -> void:
 			draw_robot_control(hand)
 			text_at("P%d" % (id + 1), rect.position + Vector2(83, 25), 16, Party.COLORS[id])
 		else:
-			draw_finger(hand, 1.0 - press_amount * 0.14, Color.WHITE if highlighted else Color("657087"))
+			draw_finger(hand, 1.0 - press_amount * 0.14, Color.WHITE if highlighted and NetPlay.can_control(id) else Color("657087"))
 		if press_amount > 0.03:
 			var flash: Color = color
 			flash.a = clampf(press_amount, 0, 1)
@@ -342,5 +350,8 @@ func draw_finger(center: Vector2, scale_factor: float, color: Color) -> void:
 	draw_set_transform(Vector2.ZERO)
 
 func round_clock(value: String) -> void:
+	if NetPlay.active:
+		var note: String = "Waiting for friends…" if NetPlay.waiting else "HOST PAUSED" if paused else "NetPlay · YOU ARE P%d" % (NetPlay.local_id + 1)
+		text_at(note, Vector2(size.x / 2, size.y - 12), 16, Party.COLORS[maxi(0, NetPlay.local_id)])
 	draw_style_box(style(Color("17243c"), 16), Rect2(size.x / 2 - 105, 8, 210, 40))
 	text_at(value, Vector2(size.x / 2, 36), 24, Color("ffd15c"))

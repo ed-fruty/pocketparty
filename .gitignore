@@ -12,3 +12,5 @@ android/.build_version
 *.keystore
 .env
 .env.*
+
+.DS_Store

@@ -23,7 +23,7 @@ assert manifest.get('package')=='com.frutylabs.pocketparty'
 assert int(manifest.get(a+'versionCode'))==version
 assert int(manifest.find('uses-sdk').get(a+'targetSdkVersion'))>=36
 assert manifest.find('application').get(a+'debuggable','false')=='false'
-assert not manifest.findall('uses-permission')
+assert {p.get(a+'name') for p in manifest.findall('uses-permission')} == {'android.permission.INTERNET'}
 assert 'PAGE_ALIGNMENT_16K' in (OUT/'verification/BundleConfig.json').read_text()
 assert 'jar verified.' in (OUT/'verification/signature-verification.txt').read_text()
 assert 'Error' not in (OUT/'verification/bundle-validation.txt').read_text()

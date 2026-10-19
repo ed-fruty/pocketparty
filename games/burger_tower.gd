@@ -32,6 +32,8 @@ func _ready() -> void:
 		views[p.id] = view
 
 func _process(delta: float) -> void:
+	if NetPlay.client_frame(self, delta):
+		return
 	for p in roster:
 		lanes[p.id].active = not paused and not ended and countdown <= 0
 		lanes[p.id].accepting = time < duration
@@ -59,6 +61,8 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func activate(id: int) -> void:
+	if NetPlay.intercept(id, "tap"):
+		return
 	if ended or paused or countdown > 0 or time >= duration or not lanes.has(id):
 		return
 	if lanes[id].drop():

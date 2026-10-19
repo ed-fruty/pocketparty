@@ -304,7 +304,7 @@ func _ready() -> void:
 	check(burger.ended and burger.scores[0] > 0, "Timed burger round completes")
 	await frames()
 	main.show_home()
-	find_button(main, "Let's play   →").pressed.emit()
+	find_button(main, "Play on One Device   →").pressed.emit()
 	check(main.page == "setup", "Home chooses roster before games")
 	check(bool(ProjectSettings.get_setting("input_devices/pointing/emulate_mouse_from_touch")), "Native menus require emulated mouse from touch")
 	check(main.find_children("*", "OptionButton", true, false).is_empty(), "Seat states use buttons")

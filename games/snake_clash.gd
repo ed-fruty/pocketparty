@@ -83,6 +83,8 @@ func grow(id: int, amount: int) -> void:
 	scores[id] = bodies[id].size()
 
 func _process(delta: float) -> void:
+	if NetPlay.client_frame(self, delta):
+		return
 	if paused or ended:
 		return
 	if countdown > 0:
@@ -236,7 +238,9 @@ func steer_at(id: int, pos: Vector2) -> void:
 	sticks[id] = offset
 	if offset.length() > 5:
 		var field = field_rect()
-		wishes[id] = (offset / field.size).normalized()
+		var direction: Vector2 = (offset / field.size).normalized()
+		if not NetPlay.intercept(id, "steer", direction):
+			wishes[id] = direction
 
 func corner_at(pos: Vector2) -> int:
 	var id: int = super.corner_at(pos)
@@ -267,7 +271,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		if not p.bot and alive[p.id]:
 			var direction: int = keys[p.id].find(event.physical_keycode)
 			if direction >= 0:
-				wishes[p.id] = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT][direction]
+				var heading: Vector2 = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT][direction]
+				if not NetPlay.intercept(p.id, "steer", heading):
+					wishes[p.id] = heading
 
 func corner_controls(_interactive: bool = true) -> void:
 	pads.clear()
@@ -289,10 +295,10 @@ func corner_controls(_interactive: bool = true) -> void:
 			draw_arc(center, 35, 0, TAU, 40, color, 4, true)
 			var offset: Vector2 = sticks[p.id] * 0.6 if held_corner_touches.values().has(p.id) else Vector2.ZERO
 			var amount: float = float(finger_amounts.get(p.id, 0))
-			draw_finger(center + offset + Vector2(0, amount * 4), 0.8 - amount * 0.08, Color.WHITE if alive[p.id] else color)
-		var caption: String = "EATEN" if not alive[p.id] else "BOT" if p.bot else "P%d · DRAG" % (p.id + 1)
+			draw_finger(center + offset + Vector2(0, amount * 4), 0.8 - amount * 0.08, Color.WHITE if alive[p.id] and NetPlay.can_control(p.id) else color)
+		var caption: String = "EATEN" if not alive[p.id] else "BOT" if p.bot else "P%d · %s" % [p.id + 1, "FRIEND" if not NetPlay.can_control(p.id) else "YOU · DRAG" if NetPlay.active else "DRAG"]
 		text_at(caption, rect.get_center() + Vector2(0, 38), 24 if p.bot and alive[p.id] else 14, color)
-		text_at(str(scores[p.id]), rect.get_center() + Vector2(0, 60), 21, Color.WHITE if alive[p.id] else color)
+		text_at(str(scores[p.id]), rect.get_center() + Vector2(0, 60), 21, Color.WHITE if alive[p.id] and NetPlay.can_control(p.id) else color)
 		circle(pos + Vector2(18, 18), 6, color)
 
 func draw_pizza(center: Vector2, radius: float) -> void:

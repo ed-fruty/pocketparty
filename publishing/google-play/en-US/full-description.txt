@@ -2,6 +2,10 @@ One screen. Everyone plays.
 
 4 Players Game Offline brings eight small games to your Android phone or tablet. Play solo, add bots, or choose any mix of up to four human and bot players sharing the same device. No internet connection or online account is needed to play.
 
+NETPLAY WITH FRIENDS
+
+Choose Create Room or Join Room to play on separate devices connected to the same private Wi-Fi. The host chooses games or tournaments and fills unused seats with bots or leaves them empty. Each device keeps its own earned gold. NetPlay needs a local network that allows devices to communicate; no internet connection or online account is required.
+
 CHOOSE YOUR CHALLENGE
 
 Snake Clash: Steer your colored snake, eat pizza to grow, and absorb smaller snakes. Becoming the biggest starts a 10-second hunt. A new biggest snake restarts the timer.

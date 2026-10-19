@@ -51,6 +51,8 @@ func jump_height(id: int, at: float) -> float:
 	return 360.0 * progress * (1.0 - progress) if progress > 0 and progress < 1 else 0.0
 
 func do_action(id: int, action: String, at: float = -1.0) -> void:
+	if NetPlay.intercept(id, "obstacle", action):
+		return
 	if paused or ended or countdown > 0 or finishing >= 0 or not alive.get(id, false):
 		return
 	if at < 0:
@@ -68,6 +70,8 @@ func activate(id: int) -> void:
 	do_action(id, pending_actions.get(id, "jump"))
 
 func _process(delta: float) -> void:
+	if NetPlay.client_frame(self, delta):
+		return
 	if paused or ended:
 		return
 	if countdown > 0:
@@ -114,7 +118,7 @@ func resolve_obstacle(obstacle: Dictionary) -> void:
 
 func corner_at(pos: Vector2) -> int:
 	for p in roster:
-		if p.bot or not alive[p.id] or not action_pads.has(p.id):
+		if p.bot or not NetPlay.can_control(p.id) or not alive[p.id] or not action_pads.has(p.id):
 			continue
 		for action in action_pads[p.id]:
 			if action_pads[p.id][action].has_point(pos):
@@ -152,7 +156,7 @@ func corner_controls(_interactive: bool = true) -> void:
 		pads[p.id] = rect
 		draw_style_box(style(Color("121b2b"), 18), rect)
 		var color: Color = p.color if alive[p.id] else Color("657087")
-		text_at("P%d · %s" % [p.id + 1, "OUT" if not alive[p.id] else "BOT" if p.bot else "RUN!"], pos + Vector2(68, 25), 17, color)
+		text_at("P%d · %s" % [p.id + 1, "OUT" if not alive[p.id] else "BOT" if p.bot else ("FRIEND" if not NetPlay.can_control(p.id) else "YOU" if NetPlay.active else "RUN!")], pos + Vector2(68, 25), 17, color)
 		if p.bot:
 			draw_robot_control(pos + Vector2(84, 74))
 			text_at("AUTO" if alive[p.id] else "OUT", pos + Vector2(84, 120), 18, Color("8794aa"))
@@ -167,8 +171,8 @@ func corner_controls(_interactive: bool = true) -> void:
 			var drawn = button_rect.grow(-pressing * 3)
 			drawn.position.y += pressing * 3
 			draw_style_box(style(color.darkened(0.65) if alive[p.id] else Color("20283a"), 12), drawn)
-			text_at("↑" if i == 0 else "↓", drawn.get_center() - Vector2(0, 5), 33, Color.WHITE if alive[p.id] else color)
-			text_at(action.to_upper(), drawn.get_center() + Vector2(0, 27), 14, Color.WHITE if alive[p.id] else color)
+			text_at("↑" if i == 0 else "↓", drawn.get_center() - Vector2(0, 5), 33, Color.WHITE if alive[p.id] and NetPlay.can_control(p.id) else color)
+			text_at(action.to_upper(), drawn.get_center() + Vector2(0, 27), 14, Color.WHITE if alive[p.id] and NetPlay.can_control(p.id) else color)
 
 func _draw() -> void:
 	var live: Array = living_ids()

@@ -70,6 +70,8 @@ static func orbit_distance(a: float, b: float) -> float:
 	return minf(difference, 1.0 - difference)
 
 func _process(delta: float) -> void:
+	if NetPlay.client_frame(self, delta):
+		return
 	if paused or ended:
 		return
 	if countdown > 0:
@@ -118,6 +120,15 @@ func ring_overlap_allowance() -> float:
 	return (clampf(side * 0.085, 10, 23) + 6 + clampf(side * 0.15, 16, 32) / 2) / (side * 4)
 
 func tap_overlaps(id: int, bot: bool) -> bool:
+	if NetPlay.remote_taps.has(id):
+		var seen: Dictionary = NetPlay.remote_taps[id]
+		# Judge the recent frame the player actually saw, bounded to 250ms.
+		if seen.get("index", -1) == target_indices[id] and seen.get("time") is float and seen.get("position") is float and seen.get("square") is Rect2:
+			var age: float = time - seen.time
+			var square: Rect2 = seen.square
+			if age >= 0 and age <= 0.25 and square.size.x >= 30 and square.size.x <= 2000 and absf(square.size.x - square.size.y) < 1 and orbit_distance(seen.position, fposmod(seen.time * LAP_SPEED, 1.0)) < 0.01:
+				return visible_overlap(square, seen.position, targets[id], range_lengths[id])
+		return false
 	if visible_overlap(board_square(id), positions[id], targets[id], range_lengths[id]):
 		return true
 	if bot or not displayed_states.has(id):
@@ -129,6 +140,8 @@ func tap_overlaps(id: int, bot: bool) -> bool:
 	return visible_overlap(shown.square, shown.position, shown.target, shown.length)
 
 func activate(id: int) -> void:
+	if NetPlay.intercept(id, "tap"):
+		return
 	if ended or paused or countdown > 0 or time >= duration or not scores.has(id):
 		return
 	if time - tap_times[id] < TAP_DEBOUNCE_SECONDS:

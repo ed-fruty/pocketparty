@@ -2,7 +2,7 @@
 
 App: **4 Players Game Offline**  
 Package: **com.frutylabs.pocketparty**  
-Latest upload: **0.3.1, version code 5**
+Latest upload: **0.3.2, version code 6**
 Support: **ed.fruty@gmail.com**  
 Privacy policy: https://raw.githubusercontent.com/ed-fruty/pocketparty/main/PRIVACY_POLICY.md  
 Source: https://github.com/ed-fruty/pocketparty
@@ -10,16 +10,16 @@ Source: https://github.com/ed-fruty/pocketparty
 ## Upload order
 
 1. Create or open the Play Console app for this package. Use the English listing text in `listing/en-US/`.
-2. Upload `bundle/com.frutylabs.pocketparty-v5.aab` to the test or release track you intend to use. Version code 5 aligns player fields with their finger controls and adds player-colored field borders. It includes NetPlay over local Wi-Fi. Earlier AABs were delivered separately; do not attempt to replace an already-uploaded build with the same version code.
+2. Upload `bundle/com.frutylabs.pocketparty-v6.aab` to the test or release track you intend to use. Version code 6 includes the final NetPlay policy/disclosure updates, refreshed store screenshots, and aligns player fields with their finger controls and adds player-colored field borders. It includes NetPlay over local Wi-Fi. Earlier AABs were delivered separately; do not attempt to replace an already-uploaded build with the same version code.
 3. Upload `graphics/app-icon-512.png` as the app icon and `graphics/feature-graphic-1024x500.png` as the feature graphic.
 4. Upload screenshots from the corresponding phone, 7-inch tablet, and 10-inch tablet folders. The first three phone gameplay screenshots can be ordered Snake Clash, Pair Peek, and Let's Dance; the library screenshot may follow them.
 5. Set the support email and privacy URL above. `store-settings.json` records the recommended listing values.
-6. Complete Play Console's Data safety, app access, ads, content-rating, target-audience, distribution, and any testing/account-verification steps presented for your developer account. These account-specific declarations are not automatically submitted by these files.
+6. Complete Play Console's Data safety, app access, ads, content-rating, target-audience, distribution, and any testing/account-verification steps presented for your developer account. Use DATA_SAFETY.md for the build-specific guidance. These account-specific declarations are not automatically submitted by these files.
 
 ## App-content facts for the current build
 
 - No online login or account is needed. All mini-games are accessible locally.
-- No ads, in-app purchases, online chat, user-generated content, analytics, or network gameplay.
+- No ads, in-app purchases, freeform chat, user-generated posts, or analytics. Optional NetPlay supports direct local-network gameplay without publisher-operated servers.
 - Local progress contains gold, owned/equipped skins, and preferences. It stays on the device; the release manifest requests INTERNET for optional local-network gameplay.
 - Data safety must be reassessed for NetPlay before uploading this version. The publisher receives no gameplay data, but optional local-network sessions transmit temporary connection information, skins, inputs and match state between devices. Review ephemeral processing and user-initiated transfer rules; do not automatically reuse the previous no-network answers. The privacy page describes the feature and voluntary email support.
 - No account-deletion URL is required for the app's current local-only player seats, because the app has no account-creation system. Local progress can be erased by clearing app storage or uninstalling.
@@ -33,6 +33,8 @@ For future builds, restore the same signing material, increment the Google Play 
 
 ```sh
 python3 tools/build_google_play.py
+python3 tools/verify_google_play.py
+python3 tools/package_google_play.py
 ```
 
 Android Gradle build files and caches are generated locally. The repository does not contain a signing password or private key. A fresh checkout needs Godot 4.7.2 export templates, Android SDK, JDK 17, and your backed-up signing material.

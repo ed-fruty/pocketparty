@@ -12,7 +12,7 @@ version=int(presets['preset.1.options']['version/code'])
 bundle=OUT/f'bundle/com.frutylabs.pocketparty-v{version}.aab'
 assert bundle.is_file()
 shutil.copytree(source/'en-US',OUT/'listing/en-US',dirs_exist_ok=True)
-for name in ['UPLOAD_NOTES.md','store-settings.json','asset-alt-text.json','GODOT_LICENSES.txt']:
+for name in ['UPLOAD_NOTES.md','DATA_SAFETY.md','store-settings.json','asset-alt-text.json','GODOT_LICENSES.txt']:
  shutil.copy2(source/name,OUT/name)
 shutil.copy2(ROOT/'PRIVACY_POLICY.md',OUT/'PRIVACY_POLICY.md')
 shutil.copy2(source/'UPLOAD_NOTES.md',OUT/'README.md')
@@ -31,7 +31,8 @@ elf=[]
 with ZipFile(bundle) as z:
  names=z.namelist()
  assert 'BundleConfig.pb' in names and 'base/manifest/AndroidManifest.xml' in names
- assert any(n.endswith('/PRIVACY_POLICY.md') for n in names)
+ policy_name=next(n for n in names if n.endswith('/PRIVACY_POLICY.md'))
+ assert z.read(policy_name)==(ROOT/'PRIVACY_POLICY.md').read_bytes()
  assert any(n.endswith('/GODOT_LICENSES.txt') for n in names)
  assert not any(any(v in n for v in ['signing.json','laptop_party_save','play-console-private','.jks','tests/','tools/']) for n in names)
  for name in names:

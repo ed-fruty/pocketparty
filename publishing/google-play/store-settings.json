@@ -10,8 +10,8 @@
   "contains_ads": false,
   "in_app_purchases": false,
   "requires_login": false,
-  "version_name": "0.3.1",
-  "version_code": 5,
+  "version_name": "0.3.2",
+  "version_code": 6,
   "target_sdk": 36,
   "min_sdk": 24
 }

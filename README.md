@@ -86,3 +86,5 @@ godot --path . tools/capture_play_store.tscn
 ```
 
 Restore your private upload key and `signing.json` into `builds/play-console-private/` before building on another machine. Those files are deliberately absent from GitHub and the upload ZIP. Increment the Google Play preset's version code for each subsequent upload. Do not recreate a missing upload key for an existing app.
+
+Release verification and packaging: after `python3 tools/build_google_play.py`, run `python3 tools/verify_google_play.py` and `python3 tools/package_google_play.py`. Before submitting NetPlay, review `publishing/google-play/DATA_SAFETY.md`.
